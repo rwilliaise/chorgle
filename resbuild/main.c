@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-const char FMT[] = "\nconst char %s_data[] = {%s};\n\nconst int %s_size = %llu;";
+const char FMT[] = "// Do not modify this file. This is machine-generated.\nconst char %s_data[] = {%s};\n\nconst int %s_size = %llu;";
 
 struct options {
 	char *output;
