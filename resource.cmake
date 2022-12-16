@@ -1,11 +1,4 @@
 
-find_program(
-	resbuild
-	NAMES resbuild
-	HINTS ${install_dir}
-	NO_SYSTEM_ENVIRONMENT_PATH
-)
-
 function(add_resources target)
 	set(result)
 	foreach(in_f ${ARGN})
@@ -13,8 +6,8 @@ function(add_resources target)
 		get_filename_component(resource_name ${src_f} NAME)
 		set(out_f "${CMAKE_SOURCE_DIR}/res/${resource_name}.h")
 		add_custom_command(OUTPUT ${out_f}
-			COMMAND ${resbuild} -o ${out_f} ${src_f}
-			DEPENDS "${src_f}" ${resbuild}
+			COMMAND ${CMAKE_BINARY_DIR}/resbuild/resbuild -o ${out_f} ${src_f}
+			DEPENDS "${src_f}" resbuild-build
 			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 			COMMENT "Packing object ${out_f}"
 			VERBATIM

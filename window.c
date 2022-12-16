@@ -1,8 +1,11 @@
 
 #include "window.h"
 
-#include <glad/gl.h>
-#define GLFW_INCLUDE_NONE
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#define GLFW_INCLUDE_ES2
+#endif
+
 #include <GLFW/glfw3.h>
 
 struct win_State {
@@ -28,30 +31,26 @@ win_State *win_newstate(alloc_t alloc) {
 	glfwSetWindowSizeCallback(W->window, win_sizecallback);
 
 	glfwMakeContextCurrent(W->window);
-	gladLoadGL(glfwGetProcAddress);
-
-	glEnable(GL_MULTISAMPLE);
+	glClearColor(0.f, 0.f, 0.f, 1.f);
 
 	return W;
 }
 
+static void win_render(void *p) {
+	win_State *W = p;
+	glClear(GL_COLOR_BUFFER_BIT);
+	glfwSwapBuffers(W->window);
+	glfwPollEvents();
+}
+
 void win_loop(win_State *W) {
+#ifdef __EMSCRIPTEN__
+	emscripten_set_main_loop_arg(win_render, W, 60, 1);
+#else
 	while (!glfwWindowShouldClose(W->window)) {
-		glClearColor(0.f, 0.f, 0.f, 1.f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		glBegin(GL_TRIANGLES);
-			  glColor3f(1.0f, 0.0f, 0.0f);
-			  glVertex2f(-0.5f, -0.5f);
-			  glColor3f(0.0f, 1.0f, 0.0f);
-			  glVertex2f( 0.5f, -0.5f);
-			  glColor3f(0.0f, 0.0f, 1.0f);
-			  glVertex2f( 0.f,  0.5f);
-	   glEnd();
-
-		glfwSwapBuffers(W->window);
-		glfwPollEvents();
+		win_render(W);
 	}
+#endif
 }
 
 void win_free(win_State *W) {

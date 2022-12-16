@@ -8,15 +8,30 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ${WITH_CCDB})
 
 include(ExternalProject)
 
-ExternalProject_Add(resbuild_project
-	PREFIX resbuild
+ExternalProject_Add(resbuild
 	BUILD_ALWAYS 1
-	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resbuild
-	BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/resbuild
+	SOURCE_DIR ${CMAKE_SOURCE_DIR}/resbuild
+	BINARY_DIR ${CMAKE_BINARY_DIR}/resbuild
 	CMAKE_COMMAND cmake # force CMAKE on path
 )
+ExternalProject_Add_StepTargets(resbuild build)
 
-ExternalProject_Get_Property(resbuild_project install_dir)
+ExternalProject_Add(glfw
+	PREFIX thirdparty
+	GIT_REPOSITORY https://github.com/glfw/glfw.git
+	GIT_TAG 3.3.8
+	UPDATE_COMMAND ""
+
+	CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/glfw"
+	CMAKE_COMMAND cmake
+)
+
+add_library(glfw3-static STATIC IMPORTED)
+add_dependencies(glfw3-static glfw)
+
+set_target_properties(glfw3-static PROPERTIES
+	IMPORTED_LOCATION ${CMAKE_BINARY_DIR}/glfw/lib/libglfw3.a)
+
 include(resource.cmake)
 
 add_resources(chorgle_res 
@@ -24,22 +39,14 @@ add_resources(chorgle_res
 	shaders/sprite.vert
 )
 
-# default sources
-set(PLATFORM_SOURCES
-	window.c
-)
-
 set(CHORGLE_SOURCES
 	main.c
+	window.c
+	graphics.c
 )
 
 if(EMSCRIPTEN AND WITH_WASM)
 	message(STATUS "EMSCRIPTEN Detected, changing platform-specific source files")
-
-	set(PLATFORM_SOURCES
-		window_wasm.c
-		gfx_wasm.c
-	)
 
 	add_executable(chorgle ${PLATFORM_SOURCES} ${CHORGLE_SOURCES})
 	target_link_options(chorgle PRIVATE -sFULL_ES2 -sMAX_WEBGL_VERSION=2)
@@ -56,12 +63,10 @@ endif()
 add_dependencies(chorgle chorgle_res)
 
 if(NOT EMSCRIPTEN OR NOT WITH_WASM)
-	add_subdirectory(thirdparty/glfw-3.3.8/)
 	add_subdirectory(thirdparty/mimalloc-2.0.7/)
-	add_subdirectory(thirdparty/glad/)
-
 	find_package(OpenGL REQUIRED)
 
-	target_link_libraries(chorgle PRIVATE OpenGL::GL glad glfw mimalloc-static)
+	target_link_libraries(chorgle PRIVATE OpenGL::GL mimalloc-static)
 endif()
+target_link_libraries(chorgle PRIVATE glfw3-static)
 
