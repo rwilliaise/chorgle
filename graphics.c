@@ -2,8 +2,8 @@
 #include <stdio.h>
 #ifdef __EMSCRIPTEN__
 #include <GLES2/gl2.h>
-#else // __EMSCRIPTEN__
-#include <GL/gl.h>
+#else // __EMSCRIPTEN__ 
+#include <glad/gl.h>
 #endif // else
 
 #include "graphics.h"
@@ -27,7 +27,9 @@ const gfx_shadersources SPRITE_SHADER = {
 	{GL_VERTEX_SHADER, sprite_vert_data, sprite_vert_size}
 };
 
-static void gfx_compileshader(GLuint program, int count, const gfx_shadersources src) {
+static void gfx_compileshader(GLuint *program, int count, const gfx_shadersources src) {
+	*program = glCreateProgram();
+
 	int shaders[count];
 	int flag;
 	char log[512];
@@ -50,13 +52,13 @@ static void gfx_compileshader(GLuint program, int count, const gfx_shadersources
 			return;
 		}
 
-		glAttachShader(program, shader);
+		glAttachShader(*program, shader);
 	}
-	glLinkProgram(program);
+	glLinkProgram(*program);
 
-	glGetProgramiv(program, GL_LINK_STATUS, &flag);
+	glGetProgramiv(*program, GL_LINK_STATUS, &flag);
 	if (flag != GL_TRUE) {
-		glGetProgramInfoLog(program, 512, NULL, log);	
+		glGetProgramInfoLog(*program, 512, NULL, log);	
 		printf("ERROR: program link:\n%s\n", log);
 		return;
 	}
@@ -70,13 +72,14 @@ gfx_State *gfx_newstate(alloc_t alloc) {
 	gfx_State *G = alloc(NULL, sizeof(gfx_State));
 
 	G->alloc = alloc;
-	G->spriteprogram = glCreateProgram();
-	gfx_compileshader(G->spriteprogram, 2, SPRITE_SHADER);
+	gfx_compileshader(&G->spriteprogram, 2, SPRITE_SHADER);
 
 	return G;
 }
 
 void gfx_free(gfx_State *G) {
+	glDeleteProgram(G->spriteprogram);
+
 	G->alloc(G, 0);
 }
 
