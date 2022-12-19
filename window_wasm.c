@@ -1,12 +1,13 @@
 
+#include "graphics.h"
 #include "window.h"
 
 #include <stdio.h>
 #include <math.h>
 
 #include <emscripten.h>
-#include <emscripten/html5.h>
 #include <emscripten/emscripten.h>
+#include <emscripten/html5.h>
 #include <emscripten/html5_webgl.h>
 
 #include <GLES2/gl2.h>
@@ -15,6 +16,7 @@
 
 struct win_State {
 	alloc_t alloc;
+	gfx_State *G;
 };
 
 static EM_BOOL win_sizecallback(int type, const EmscriptenUiEvent *event, void *ud) {
@@ -28,7 +30,7 @@ static EM_BOOL win_sizecallback(int type, const EmscriptenUiEvent *event, void *
 	return EM_TRUE;
 }
 
-win_State *win_newstate(alloc_t alloc) {
+win_State *win_createstate(alloc_t alloc) {
 	win_State *W = alloc(NULL, sizeof(win_State));
 
 	EmscriptenWebGLContextAttributes attrib = {
@@ -46,6 +48,8 @@ win_State *win_newstate(alloc_t alloc) {
 
 	emscripten_webgl_make_context_current(gl);
 	emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, NULL, EM_FALSE, win_sizecallback);
+
+	W->G = gfx_createstate(alloc);
 
 	int width, height;
 	emscripten_get_screen_size(&width, &height);

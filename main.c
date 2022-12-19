@@ -12,8 +12,7 @@ static alloc_t global_alloc = &mi_realloc;
 #endif
 
 int start() {
-	win_State *W = win_newstate(global_alloc);
-	gfx_State *G = gfx_newstate(global_alloc);
+	win_State *W = win_createstate(global_alloc);
 
 	win_loop(W);
 	return 0;

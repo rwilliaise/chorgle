@@ -6,7 +6,7 @@
 
 typedef struct gfx_State gfx_State;
 
-gfx_State *gfx_newstate(alloc_t alloc);
+gfx_State *gfx_createstate(alloc_t alloc);
 void gfx_free(gfx_State *G);
 
 #endif // graphics_h

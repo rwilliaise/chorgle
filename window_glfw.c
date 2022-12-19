@@ -1,4 +1,5 @@
 
+#include "graphics.h"
 #include "window.h"
 
 #define GLFW_INCLUDE_NONE
@@ -8,13 +9,14 @@
 struct win_State {
 	alloc_t alloc;
 	GLFWwindow *window;
+	gfx_State *G;
 };
 
 static void win_sizecallback(GLFWwindow *win, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-win_State *win_newstate(alloc_t alloc) {
+win_State *win_createstate(alloc_t alloc) {
 	if (glfwInit() != GLFW_TRUE) {
 		return NULL;
 	}
@@ -31,6 +33,8 @@ win_State *win_newstate(alloc_t alloc) {
 
 	glfwSetWindowSizeCallback(W->window, win_sizecallback);
 	glClearColor(1.f, 0.f, 0.f, 1.f);
+
+	W->G = gfx_createstate(alloc);
 
 	return W;
 }

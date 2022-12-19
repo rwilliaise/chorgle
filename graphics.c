@@ -68,7 +68,7 @@ static void gfx_compileshader(GLuint *program, int count, const gfx_shadersource
 	}
 }
 
-gfx_State *gfx_newstate(alloc_t alloc) {
+gfx_State *gfx_createstate(alloc_t alloc) {
 	gfx_State *G = alloc(NULL, sizeof(gfx_State));
 
 	G->alloc = alloc;

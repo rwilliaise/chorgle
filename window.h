@@ -6,7 +6,7 @@
 
 typedef struct win_State win_State;
 
-win_State *win_newstate (alloc_t alloc);
+win_State *win_createstate (alloc_t alloc);
 void win_loop(win_State *W);
 void win_free(win_State *W);
 
